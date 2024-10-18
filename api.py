@@ -9,7 +9,7 @@ SCOPES =["https://www.googleapis.com/auth/spreadsheets"]
 
 SPREADSHEET_ID="1xFukNASy7VFPNV3b5cKHHgTDlIaFpMyPx4WZ-AXOgWg"
 
-def main():
+def fetch_data(start_row):
     credentials=None
     if os.path.exists("token.json"):
         credentials=Credentials.from_authorized_user_file(token.json,SCOPES)
@@ -25,21 +25,17 @@ def main():
             try:
                 service=build("sheets","v4",credentials=credentials)
                 sheets=service.spreadsheets()
-                data=f"Sheet1! A1:A6"
+                data=f"Sheet1! A{start_row}:B"
                 result=sheets.values().get(spreadsheetId=SPREADSHEET_ID, range=data).execute()
                 values=result.get("values",[])
-                
+
+                return values
                 for row in values:
                     print(row)
             except HttpError:
                 print("error")
+            return []
 
-import os
-
-if os.getenv("DISPLAY") is None:
-    print("Headless environment detected: No GUI available.")
-else:
-    print("GUI environment detected.")
 
 if __name__ =="__main__":
     main()

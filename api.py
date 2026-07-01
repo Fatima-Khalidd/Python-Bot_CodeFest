@@ -35,5 +35,4 @@ def fetch_data(start_row):
         return []
 
 
-if __name__ == "__main__":
-    fetch_data(2)
+

@@ -5,41 +5,35 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-SCOPES =["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-SPREADSHEET_ID="1xFukNASy7VFPNV3b5cKHHgTDlIaFpMyPx4WZ-AXOgWg"
+SPREADSHEET_ID = "1xFukNASy7VFPNV3b5cKHHgTDlIaFpMyPx4WZ-AXOgWg"
 
 def fetch_data(start_row):
-    credentials=None
+    credentials = None
     if os.path.exists("token.json"):
-        credentials=Credentials.from_authorized_user_file(token.json,SCOPES)
-        if not credentials or not credentials.valid:
-            if credentials and credentials.expired and credentials.refresh_token:
-                credentials.refresh(Request())
-            else: 
-                flow= InstalledAppFlow.from_client_secrets_file("credentials.json",SCOPES)
-                credentials=flow.run_local_server(port=0)
-                #credentials=flow.run_console()
-                with open("token.json","w") as token:
-                    token.write(credentials.to_json())
-            try:
-                service=build("sheets","v4",credentials=credentials)
-                sheets=service.spreadsheets()
-                data=f"Sheet1! A{start_row}:B"
-                result=sheets.values().get(spreadsheetId=SPREADSHEET_ID, range=data).execute()
-                values=result.get("values",[])
+        credentials = Credentials.from_authorized_user_file("token.json", SCOPES)
 
-                return values
-                for row in values:
-                    print(row)
-            except HttpError:
-                print("error")
-            return []
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            credentials = flow.run_local_server(port=0)
+            with open("token.json", "w") as token:
+                token.write(credentials.to_json())
+
+    try:
+        service = build("sheets", "v4", credentials=credentials)
+        sheets = service.spreadsheets()
+        data_range = f"Sheet1!A{start_row}:B"
+        result = sheets.values().get(spreadsheetId=SPREADSHEET_ID, range=data_range).execute()
+        values = result.get("values", [])
+        return values
+    except HttpError:
+        print("error")
+        return []
 
 
-if __name__ =="__main__":
-    main()
-
-
-
-    
+if __name__ == "__main__":
+    fetch_data(2)
